@@ -41,13 +41,13 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
           const tmdb = new TheMovieDb();
 
           try {
-            const movie = await tmdb.getMovie({ movieId: entity.tmdbId });
+            const movie = await tmdb.getMovie({ movieId: entity.tmdbId, language: "fr" });
 
             relatedRequests.forEach((request) => {
               notificationManager.sendNotification(
                 Notification.MEDIA_AVAILABLE,
                 {
-                  event: `${is4k ? '4K ' : ''}Movie Request Now Available`,
+                  event: `Film ${is4k ? 'en 4K ' : ''}ajouté !`,
                   notifyAdmin: false,
                   notifySystem: true,
                   notifyUser: request.requestedBy,
@@ -136,9 +136,9 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
           );
 
           try {
-            const tv = await tmdb.getTvShow({ tvId: entity.tmdbId });
+            const tv = await tmdb.getTvShow({ tvId: entity.tmdbId, language: "fr" });
             notificationManager.sendNotification(Notification.MEDIA_AVAILABLE, {
-              event: `${is4k ? '4K ' : ''}Series Request Now Available`,
+              event: `Série ${is4k ? '4K ' : ''}ajoutée !`,
               subject: `${tv.name}${
                 tv.first_air_date ? ` (${tv.first_air_date.slice(0, 4)})` : ''
               }`,
@@ -154,7 +154,7 @@ export class MediaSubscriber implements EntitySubscriberInterface<Media> {
               media: entity,
               extra: [
                 {
-                  name: 'Requested Seasons',
+                  name: 'Saisons ajoutées',
                   value: request.seasons
                     .map((season) => season.seasonNumber)
                     .join(', '),

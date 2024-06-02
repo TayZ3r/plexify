@@ -1,17 +1,13 @@
-import { IssueStatus, IssueTypeName } from '@server/constants/issue';
-import { getRepository } from '@server/datasource';
-import { User } from '@server/entity/User';
-import type { NotificationAgentDiscord } from '@server/lib/settings';
-import { getSettings, NotificationAgentKey } from '@server/lib/settings';
+import {IssueStatus, IssueTypeName} from '@server/constants/issue';
+import {getRepository} from '@server/datasource';
+import {User} from '@server/entity/User';
+import type {NotificationAgentDiscord} from '@server/lib/settings';
+import {getSettings, NotificationAgentKey} from '@server/lib/settings';
 import logger from '@server/logger';
 import axios from 'axios';
-import {
-  hasNotificationType,
-  Notification,
-  shouldSendAdminNotification,
-} from '..';
-import type { NotificationAgent, NotificationPayload } from './agent';
-import { BaseAgent } from './agent';
+import {hasNotificationType, Notification, shouldSendAdminNotification,} from '..';
+import type {NotificationAgent, NotificationPayload} from './agent';
+import {BaseAgent} from './agent';
 
 enum EmbedColors {
   DEFAULT = 0,
@@ -115,7 +111,7 @@ class DiscordAgent
     let color = EmbedColors.DARK_PURPLE;
     const fields: Field[] = [];
 
-    if (payload.request) {
+    if (payload.request && type !== Notification.MEDIA_AVAILABLE) {
       fields.push({
         name: 'Requested By',
         value: payload.request.requestedBy.displayName,
@@ -147,7 +143,7 @@ class DiscordAgent
           break;
       }
 
-      if (status) {
+      if (status && type !== Notification.MEDIA_AVAILABLE) {
         fields.push({
           name: 'Request Status',
           value: status,
