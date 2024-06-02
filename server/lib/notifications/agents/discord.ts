@@ -292,7 +292,12 @@ class DiscordAgent
         }
       }
 
-      await axios.post(settings.options.webhookUrl, {
+      let webhookUrl = settings.options.webhookUrl;
+      if (type === Notification.MEDIA_AVAILABLE) {
+        webhookUrl = process.env.ALTERNATIVE_DISCORD_HOOK;
+      }
+
+      await axios.post(webhookUrl, {
         username: settings.options.botUsername
           ? settings.options.botUsername
           : getSettings().main.applicationTitle,
