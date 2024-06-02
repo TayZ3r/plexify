@@ -111,12 +111,14 @@ class DiscordAgent
     let color = EmbedColors.DARK_PURPLE;
     const fields: Field[] = [];
 
-    if (payload.request && type !== Notification.MEDIA_AVAILABLE) {
-      fields.push({
-        name: 'Requested By',
-        value: payload.request.requestedBy.displayName,
-        inline: true,
-      });
+    if (payload.request) {
+      if (type !== Notification.MEDIA_AVAILABLE) {
+        fields.push({
+          name: 'Requested By',
+          value: payload.request.requestedBy.displayName,
+          inline: true,
+        });
+      }
 
       let status = '';
       switch (type) {
