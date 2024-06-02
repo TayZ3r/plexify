@@ -294,7 +294,7 @@ class DiscordAgent
 
       let webhookUrl = settings.options.webhookUrl;
       if (type === Notification.MEDIA_AVAILABLE) {
-        webhookUrl = process.env.ALTERNATIVE_DISCORD_HOOK;
+        webhookUrl = process.env.ALTERNATIVE_DISCORD_HOOK ?? settings.options.webhookUrl;
       }
 
       await axios.post(webhookUrl, {
