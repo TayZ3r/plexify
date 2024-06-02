@@ -101,6 +101,7 @@ class DiscordAgent
     }
 
     const settings = getSettings();
+    settings.notifications.agents.discord.types;
 
     return settings.notifications.agents.discord;
   }
@@ -245,7 +246,7 @@ class DiscordAgent
 
     if (
       !payload.notifySystem ||
-      !hasNotificationType(type, settings.types ?? 0)
+      (type !== Notification.MEDIA_AVAILABLE && !hasNotificationType(type, settings.types ?? 0))
     ) {
       return true;
     }
