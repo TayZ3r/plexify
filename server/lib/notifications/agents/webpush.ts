@@ -58,24 +58,24 @@ class WebPushAgent
         message = payload.message;
         break;
       case Notification.MEDIA_AUTO_REQUESTED:
-        message = `Demande automatique de ${mediaType} envoyée.`;
+        message = `Demande automatique envoyée.`;
         break;
       case Notification.MEDIA_APPROVED:
-        message = `Votre requête de ${mediaType} a été approuvée.`;
+        message = `Votre requête a été approuvée.`;
         break;
       case Notification.MEDIA_AUTO_APPROVED:
-        message = `Requête de type ${mediaType} automatiquement approuvée. Demandé par ${
+        message = `Requête automatiquement approuvée. Demandé par ${
           payload.request?.requestedBy.displayName
         }.`;
         break;
       case Notification.MEDIA_AVAILABLE:
-        message = `Votre requête de ${mediaType} est disponible !`;
+        message = `Votre requête est disponible !`;
         break;
       case Notification.MEDIA_DECLINED:
-        message = `Votre requête de ${mediaType} a été rejetée.`;
+        message = `Votre requête a été rejetée.`;
         break;
       case Notification.MEDIA_FAILED:
-        message = `Impossible de télécharger votre requête de ${mediaType}.`;
+        message = `Impossible de télécharger votre requête.`;
         break;
       case Notification.MEDIA_PENDING:
         message = `Validation requise pour un/une ${mediaType} de ${
