@@ -321,6 +321,12 @@ const MovieRequestModal = ({
       okButtonType={'primary'}
       backdrop={`https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/${data?.backdropPath}`}
     >
+      {data?.releaseDate && new Date(data.releaseDate) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) && (
+        <Alert
+          title={`Ce film étant sorti récemment, son ajout automatique n'est pas garanti. Il sera cependant ajouté lorsqu'il sera disponible sur les autres plateformes.`}
+          type="warning"
+        />
+      )}
       {hasAutoApprove && !quota?.movie.restricted && (
         <div className="mt-6">
           <Alert
@@ -329,12 +335,6 @@ const MovieRequestModal = ({
           />
         </div>
       )}
-      <div className="mt-6">
-          <Alert
-            title={`Ce film étant sorti récemment, son ajout automatique n'est pas garanti. Il sera cependant ajouté lorsqu'il sera disponible sur les autres plateformes. ${data?.releaseDate}`}
-            type="warning"
-          />
-        </div>
       {(quota?.movie.limit ?? 0) > 0 && (
         <QuotaDisplay
           mediaType="movie"
