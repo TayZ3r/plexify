@@ -329,6 +329,12 @@ const MovieRequestModal = ({
           />
         </div>
       )}
+      <div className="mt-6">
+          <Alert
+            title="Ce film étant sorti récemment, son ajout automatique n'est pas garanti. Il sera cependant ajouté lorsqu'il sera disponible sur les autres plateformes."
+            type="warning"
+          />
+        </div>
       {(quota?.movie.limit ?? 0) > 0 && (
         <QuotaDisplay
           mediaType="movie"
