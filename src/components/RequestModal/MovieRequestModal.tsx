@@ -331,7 +331,7 @@ const MovieRequestModal = ({
       )}
       <div className="mt-6">
           <Alert
-            title="Ce film étant sorti récemment, son ajout automatique n'est pas garanti. Il sera cependant ajouté lorsqu'il sera disponible sur les autres plateformes."
+            title={`Ce film étant sorti récemment, son ajout automatique n'est pas garanti. Il sera cependant ajouté lorsqu'il sera disponible sur les autres plateformes. ${data?.releaseDate}`}
             type="warning"
           />
         </div>
