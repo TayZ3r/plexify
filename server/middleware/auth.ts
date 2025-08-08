@@ -13,7 +13,7 @@ export const checkUser: Middleware = async (req, _res, next) => {
   if (req.header('X-API-Key') === settings.main.apiKey) {
     const userRepository = getRepository(User);
 
-    let userId = 1; // Work on original administrator account
+    let userId = 3; // Work on original administrator account
 
     // If a User ID is provided, we will act on that user's behalf
     if (req.header('X-API-User')) {
