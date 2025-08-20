@@ -89,7 +89,7 @@ userSettingsRoutes.post<
     }
 
     // "Owner" user settings cannot be modified by other users
-    if (user.id === 3 && req.user?.id !== 3) {
+    if (user.id === 1 && req.user?.id !== 1) {
       return next({
         status: 403,
         message: "You do not have permission to modify this user's settings.",
@@ -196,10 +196,10 @@ userSettingsRoutes.post<
     }
 
     if (
-      (user.id === 3 && req.user?.id !== 3) ||
+      (user.id === 1 && req.user?.id !== 1) ||
       (user.hasPermission(Permission.ADMIN) &&
         user.id !== req.user?.id &&
-        req.user?.id !== 3)
+        req.user?.id !== 1)
     ) {
       return next({
         status: 403,
@@ -304,7 +304,7 @@ userSettingsRoutes.post<{ id: string }, UserSettingsNotificationsResponse>(
       }
 
       // "Owner" user settings cannot be modified by other users
-      if (user.id === 3 && req.user?.id !== 3) {
+      if (user.id === 1 && req.user?.id !== 1) {
         return next({
           status: 403,
           message: "You do not have permission to modify this user's settings.",
@@ -401,7 +401,7 @@ userSettingsRoutes.post<
       }
 
       // "Owner" user permissions cannot be modified, and users cannot set their own permissions
-      if (user.id === 3 || req.user?.id === user.id) {
+      if (user.id === 1 || req.user?.id === user.id) {
         return next({
           status: 403,
           message: 'You do not have permission to modify this user',

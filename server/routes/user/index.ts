@@ -336,7 +336,7 @@ export const canMakePermissionsChange = (
   user?: User
 ): boolean =>
   // Only let the owner grant admin privileges
-  !(hasPermission(Permission.ADMIN, permissions) && user?.id !== 3);
+  !(hasPermission(Permission.ADMIN, permissions) && user?.id !== 1);
 
 router.put<
   Record<string, never>,
@@ -358,7 +358,7 @@ router.put<
     const users: User[] = await userRepository.find({
       where: {
         id: In(
-          isOwner ? req.body.ids : req.body.ids.filter((id) => Number(id) !== 3)
+          isOwner ? req.body.ids : req.body.ids.filter((id) => Number(id) !== 1)
         ),
       },
     });
@@ -390,7 +390,7 @@ router.put<{ id: string }>(
       });
 
       // Only let the owner user modify themselves
-      if (user.id === 3 && req.user?.id !== 3) {
+      if (user.id === 1 && req.user?.id !== 1) {
         return next({
           status: 403,
           message: 'You do not have permission to modify this user',
@@ -441,7 +441,7 @@ router.delete<{ id: string }>(
         });
       }
 
-      if (user.hasPermission(Permission.ADMIN) && req.user?.id !== 3) {
+      if (user.hasPermission(Permission.ADMIN) && req.user?.id !== 1) {
         return next({
           status: 405,
           message: 'You cannot delete users with administrative privileges.',
