@@ -45,13 +45,6 @@ export class MediaRequestSubscriber
           movieId: entity.media.tmdbId,
           language: "fr"
         });
-        const now = new Date();
-              const tsISO = now.toISOString(); // ISO pour logs / agents qui savent l’utiliser
-              const tsFR  = new Intl.DateTimeFormat('fr-FR', {
-                dateStyle: 'full',
-                timeStyle: 'short',
-                timeZone: 'Europe/Paris',
-              }).format(now);
         notificationManager.sendNotification(Notification.MEDIA_AVAILABLE, {
           event: `${entity.is4k ? '4K ' : ''}Film ajouté !`,
           notifyAdmin: false,
@@ -67,7 +60,6 @@ export class MediaRequestSubscriber
           }),
           media: entity.media,
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`,
-          timestamp: {tsFR},
           request: entity,
         });
       } catch (e) {
@@ -101,14 +93,6 @@ export class MediaRequestSubscriber
       try {
         const tv = await tmdb.getTvShow({ tvId: entity.media.tmdbId, language: "fr" });
 
-        const now = new Date();
-              const tsISO = now.toISOString(); // ISO pour logs / agents qui savent l’utiliser
-              const tsFR  = new Intl.DateTimeFormat('fr-FR', {
-                dateStyle: 'full',
-                timeStyle: 'short',
-                timeZone: 'Europe/Paris',
-              }).format(now);
-
         notificationManager.sendNotification(Notification.MEDIA_AVAILABLE, {
           event: `${entity.is4k ? '4K ' : ''}Série ajoutée !`,
           subject: `${tv.name}${
@@ -123,7 +107,6 @@ export class MediaRequestSubscriber
           notifySystem: true,
           notifyUser: entity.requestedBy,
           image: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tv.poster_path}`,
-          timestamp: {tsFR},
           media: entity.media,
           extra: [
             {

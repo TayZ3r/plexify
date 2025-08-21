@@ -21,7 +21,6 @@ export interface NotificationPayload {
   comment?: IssueComment;
   pendingRequestsCount?: number;
   isAdmin?: boolean;
-  timestamp?: string;
 }
 
 export abstract class BaseAgent<T extends NotificationAgentConfig> {
