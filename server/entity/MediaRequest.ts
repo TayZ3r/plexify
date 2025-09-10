@@ -329,8 +329,8 @@ export class MediaRequest {
           : undefined,
         is4k: requestBody.is4k,
         serverId: requestBody.serverId,
-        profileId: requestBody.profileId,
-        rootFolder: requestBody.rootFolder,
+        profileId: tmdbMediaShow.keywords.some((keyword) => keyword.id === 210024) ? 7 : requestBody.profileId,
+        rootFolder: tmdbMediaShow.keywords.some((keyword) => keyword.id === 210024) ? "/downloads/Animes" : requestBody.rootFolder,
         languageProfileId: requestBody.languageProfileId,
         tags: requestBody.tags,
         seasons: finalSeasons.map(
