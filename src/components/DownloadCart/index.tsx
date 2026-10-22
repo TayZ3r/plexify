@@ -6,7 +6,6 @@ import { Permission, useUser } from '@app/hooks/useUser';
 import { formatBytes } from '@app/utils/numberHelpers';
 import {
   ArrowDownTrayIcon,
-  ShoppingCartIcon,
   TrashIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -16,34 +15,66 @@ import type {
   DownloadListResponse,
 } from '@server/interfaces/api/downloadInterfaces';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { useToasts } from 'react-toast-notifications';
 import useSWR from 'swr';
 
 const messages = defineMessages({
-  cart: 'Download Cart',
-  opencart: 'Open download cart',
-  emptycart: 'Your download cart is empty.',
+  downloads: 'Downloads',
+  opendownloads: 'Open downloads',
+  empty: 'Nothing selected for download yet.',
   quotaremaining:
     '{remaining} of {limit} {limit, plural, one {download} other {downloads}} remaining (per {days} {days, plural, one {day} other {days}})',
   quotaunlimited: 'Unlimited downloads',
   seasonnote: 'A season counts as one download per episode.',
-  validate: 'Validate & Download',
+  validate: 'Download ({count})',
   validating: 'Preparing…',
-  clear: 'Clear Cart',
+  clear: 'Remove All',
+  vlcadvice:
+    'For better compatibility, we recommend playing your files with VLC.',
+  getvlc: 'Get VLC on the {store}',
   remove: 'Remove',
   recentdownloads: 'Recent Downloads',
   recentdownloadstip:
     'Links stay valid for 48 hours. If your browser blocked some downloads, start them from here.',
   downloadstarted:
     '{count, plural, one {# download} other {# downloads}} started!',
-  checkoutfailed: 'Something went wrong while validating the cart.',
+  checkoutfailed: 'Something went wrong while preparing the downloads.',
   quotaexceeded:
     'Download limit exceeded: you have {remaining, plural, =0 {no download} one {# download} other {# downloads}} left.',
   nofiles: 'No downloadable file was found for the selected items.',
   expires: 'Expires {date}',
 });
+
+const VLC_STORE_LINKS = {
+  ios: {
+    name: 'App Store',
+    url: 'https://apps.apple.com/app/vlc-media-player/id650377962',
+  },
+  android: {
+    name: 'Play Store',
+    url: 'https://play.google.com/store/apps/details?id=org.videolan.vlc',
+  },
+};
+
+const getMobileStore = (): keyof typeof VLC_STORE_LINKS | undefined => {
+  const userAgent = navigator.userAgent;
+
+  if (/android/i.test(userAgent)) {
+    return 'android';
+  }
+
+  // iPadOS reports itself as a Mac, so also check for a touch screen
+  if (
+    /iphone|ipad|ipod/i.test(userAgent) ||
+    (/macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1)
+  ) {
+    return 'ios';
+  }
+
+  return undefined;
+};
 
 // Delay between each download so that browsers do not drop any of them
 const DOWNLOAD_INTERVAL = 1500;
@@ -64,10 +95,16 @@ const DownloadCart = () => {
   const { hasPermission } = useUser();
   const { items, isOpen, setOpen, removeItem, clear } = useDownloadCart();
   const [isSubmitting, setSubmitting] = useState(false);
+  const [mobileStore, setMobileStore] =
+    useState<keyof typeof VLC_STORE_LINKS>();
   const canDownload = hasPermission(Permission.DOWNLOAD);
   const { data, mutate } = useSWR<DownloadListResponse>(
     canDownload ? '/api/v1/download' : null
   );
+
+  useEffect(() => {
+    setMobileStore(getMobileStore());
+  }, []);
 
   if (!canDownload) {
     return null;
@@ -136,10 +173,10 @@ const DownloadCart = () => {
       {(items.length > 0 || !!data?.downloads.length) && (
         <button
           className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-indigo-500 bg-indigo-600 text-white shadow-lg transition hover:bg-indigo-500 focus:outline-none sm:bottom-6 sm:right-6"
-          aria-label={intl.formatMessage(messages.opencart)}
+          aria-label={intl.formatMessage(messages.opendownloads)}
           onClick={() => setOpen(true)}
         >
-          <ShoppingCartIcon className="h-7 w-7" />
+          <ArrowDownTrayIcon className="h-7 w-7" />
           {items.length > 0 && (
             <span className="absolute -right-1 -top-1 flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold">
               {items.length}
@@ -149,7 +186,7 @@ const DownloadCart = () => {
       )}
       <SlideOver
         show={isOpen}
-        title={intl.formatMessage(messages.cart)}
+        title={intl.formatMessage(messages.downloads)}
         subText={
           quota
             ? quota.limit
@@ -166,7 +203,7 @@ const DownloadCart = () => {
         <div className="space-y-6">
           {items.length === 0 ? (
             <p className="text-gray-400">
-              {intl.formatMessage(messages.emptycart)}
+              {intl.formatMessage(messages.empty)}
             </p>
           ) : (
             <>
@@ -229,12 +266,29 @@ const DownloadCart = () => {
                 >
                   <ArrowDownTrayIcon />
                   <span>
-                    {intl.formatMessage(
-                      isSubmitting ? messages.validating : messages.validate
-                    )}
+                    {isSubmitting
+                      ? intl.formatMessage(messages.validating)
+                      : intl.formatMessage(messages.validate, {
+                          count: items.length,
+                        })}
                   </span>
                 </Button>
               </div>
+              {mobileStore && (
+                <div className="rounded-md border border-gray-700 bg-gray-800 p-3 text-sm text-gray-300">
+                  <p>{intl.formatMessage(messages.vlcadvice)}</p>
+                  <a
+                    href={VLC_STORE_LINKS[mobileStore].url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block font-semibold text-indigo-400 hover:text-indigo-300"
+                  >
+                    {intl.formatMessage(messages.getvlc, {
+                      store: VLC_STORE_LINKS[mobileStore].name,
+                    })}
+                  </a>
+                </div>
+              )}
             </>
           )}
           {!!data?.downloads.length && (

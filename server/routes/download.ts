@@ -13,11 +13,10 @@ import type {
   DownloadFile,
   DownloadListResponse,
 } from '@server/interfaces/api/downloadInterfaces';
-import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { AfterDate } from '@server/utils/dateHelpers';
-import axios from 'axios';
 import { Router } from 'express';
+import fs from 'fs';
 
 // Maximum number of items accepted in a single cart
 const MAX_CART_ITEMS = 100;
@@ -29,7 +28,7 @@ interface ResolvedFile {
   seasonNumber?: number;
   episodeNumber?: number;
   title: string;
-  partKey: string;
+  filePath: string;
   fileName: string;
   fileSize?: number;
 }
@@ -65,7 +64,7 @@ const getEpisodeTitle = (episode: PlexMetadata): string =>
 
 const toFiles = (
   metadata: PlexMetadata,
-  base: Omit<ResolvedFile, 'partKey' | 'fileName' | 'fileSize' | 'title'>,
+  base: Omit<ResolvedFile, 'filePath' | 'fileName' | 'fileSize' | 'title'>,
   title: string
 ): ResolvedFile[] => {
   // Only download the first version of the item, but include every part of it
@@ -74,7 +73,7 @@ const toFiles = (
   return parts.map((part, index) => ({
     ...base,
     title: parts.length > 1 ? `${title} (${index + 1}/${parts.length})` : title,
-    partKey: part.key,
+    filePath: part.file,
     fileName: getFileName(part.file),
     fileSize: part.size,
   }));
@@ -271,7 +270,7 @@ downloadRoutes.post<never, DownloadCheckoutResponse, DownloadCheckoutRequest>(
       // The same file can be in the cart twice (e.g. an episode and its season)
       const files = resolved.filter(
         (file, index) =>
-          resolved.findIndex((f) => f.partKey === file.partKey) === index
+          resolved.findIndex((f) => f.filePath === file.filePath) === index
       );
 
       if (files.length === 0) {
@@ -333,7 +332,7 @@ downloadRoutes.get<{ downloadId: string }>(
     try {
       const download = await getRepository(MediaDownload)
         .createQueryBuilder('download')
-        .addSelect('download.partKey')
+        .addSelect('download.filePath')
         .leftJoin('download.user', 'user')
         .where('download.id = :id', { id: Number(req.params.downloadId) })
         .andWhere('user.id = :userId', { userId: req.user.id })
@@ -347,68 +346,45 @@ downloadRoutes.get<{ downloadId: string }>(
         return next({ status: 410, message: 'This download link expired.' });
       }
 
-      const plexToken = await getAdminPlexToken();
-
-      if (!plexToken) {
-        return next({ status: 500, message: 'Plex is not configured.' });
+      // Serve the file straight from its path on disk (Range requests included)
+      if (!fs.existsSync(download.filePath)) {
+        logger.error('Download file not found on disk', {
+          label: 'Download',
+          downloadId: download.id,
+          filePath: download.filePath,
+        });
+        return next({ status: 404, message: 'File not found on disk.' });
       }
 
-      const { plex } = getSettings();
-      const controller = new AbortController();
-      req.on('close', () => controller.abort());
-
-      const upstream = await axios.get(
-        `${plex.useSsl ? 'https' : 'http'}://${plex.ip}:${plex.port}${
-          download.partKey
-        }`,
+      res.sendFile(
+        download.filePath,
         {
-          params: { download: 1 },
+          dotfiles: 'allow',
           headers: {
-            'X-Plex-Token': plexToken,
-            ...(req.headers.range ? { Range: req.headers.range } : {}),
+            'Content-Disposition': `attachment; filename="${download.fileName.replace(
+              /[^\x20-\x7e]|"/g,
+              '_'
+            )}"; filename*=UTF-8''${encodeURIComponent(download.fileName)}`,
           },
-          responseType: 'stream',
-          signal: controller.signal,
-          validateStatus: (status) => status === 200 || status === 206,
+        },
+        (err) => {
+          if (err && !res.headersSent) {
+            logger.error('Something went wrong sending a download', {
+              label: 'Download',
+              errorMessage: err.message,
+              downloadId: download.id,
+            });
+            next({ status: 500, message: 'Unable to download the file.' });
+          }
         }
       );
-
-      res.status(upstream.status);
-      ['content-length', 'content-range', 'accept-ranges'].forEach((header) => {
-        if (upstream.headers[header]) {
-          res.setHeader(header, upstream.headers[header] as string);
-        }
-      });
-      res.setHeader(
-        'Content-Type',
-        (upstream.headers['content-type'] as string) ??
-          'application/octet-stream'
-      );
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${download.fileName.replace(
-          /[^\x20-\x7e]|"/g,
-          '_'
-        )}"; filename*=UTF-8''${encodeURIComponent(download.fileName)}`
-      );
-
-      upstream.data.pipe(res);
     } catch (e) {
-      if (axios.isCancel(e)) {
-        return;
-      }
-
-      logger.error('Something went wrong streaming a download', {
+      logger.error('Something went wrong retrieving a download', {
         label: 'Download',
         errorMessage: e.message,
         downloadId: req.params.downloadId,
       });
-
-      if (!res.headersSent) {
-        return next({ status: 502, message: 'Unable to download the file.' });
-      }
-
-      res.end();
+      return next({ status: 500, message: 'Unable to download the file.' });
     }
   }
 );

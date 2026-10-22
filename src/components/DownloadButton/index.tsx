@@ -7,7 +7,7 @@ import { defineMessages, useIntl } from 'react-intl';
 
 const messages = defineMessages({
   download: 'Download',
-  incart: 'In Cart',
+  incart: 'Selected',
   includedinseason: 'Included in Season',
 });
 

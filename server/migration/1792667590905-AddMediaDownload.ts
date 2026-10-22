@@ -5,7 +5,7 @@ export class AddMediaDownload1792667590905 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "media_download" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "mediaType" varchar NOT NULL, "tmdbId" integer NOT NULL, "ratingKey" varchar NOT NULL, "seasonNumber" integer, "episodeNumber" integer, "title" varchar NOT NULL, "partKey" varchar NOT NULL, "fileName" varchar NOT NULL, "fileSize" integer, "createdAt" datetime NOT NULL DEFAULT (datetime('now')), "userId" integer, CONSTRAINT "FK_869ed9c29ba013b9e701fe2a082" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE NO ACTION)`
+      `CREATE TABLE "media_download" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "mediaType" varchar NOT NULL, "tmdbId" integer NOT NULL, "ratingKey" varchar NOT NULL, "seasonNumber" integer, "episodeNumber" integer, "title" varchar NOT NULL, "filePath" varchar NOT NULL, "fileName" varchar NOT NULL, "fileSize" integer, "createdAt" datetime NOT NULL DEFAULT (datetime('now')), "userId" integer, CONSTRAINT "FK_869ed9c29ba013b9e701fe2a082" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE NO ACTION)`
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_869ed9c29ba013b9e701fe2a08" ON "media_download" ("userId") `

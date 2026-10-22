@@ -40,9 +40,9 @@ export class MediaDownload {
   @Column()
   public title: string;
 
-  // Plex part key, e.g. /library/parts/1234/1600000000/file.mkv
+  // Path of the media file on disk, as reported by Plex
   @Column({ select: false })
-  public partKey: string;
+  public filePath: string;
 
   @Column()
   public fileName: string;
