@@ -95,6 +95,7 @@ export interface MainSettings {
   defaultQuotas: {
     movie: Quota;
     tv: Quota;
+    download: Quota;
   };
   hideAvailable: boolean;
   localLogin: boolean;
@@ -292,6 +293,7 @@ class Settings {
         defaultQuotas: {
           movie: {},
           tv: {},
+          download: {},
         },
         hideAvailable: false,
         localLogin: true,

@@ -1,3 +1,4 @@
+import DownloadCart from '@app/components/DownloadCart';
 import MobileMenu from '@app/components/Layout/MobileMenu';
 import PullToRefresh from '@app/components/Layout/PullToRefresh';
 import SearchInput from '@app/components/Layout/SearchInput';
@@ -128,6 +129,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         </main>
       </div>
+      <DownloadCart />
     </div>
   );
 };

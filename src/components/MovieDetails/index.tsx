@@ -12,6 +12,7 @@ import type { PlayButtonLink } from '@app/components/Common/PlayButton';
 import PlayButton from '@app/components/Common/PlayButton';
 import Tag from '@app/components/Common/Tag';
 import Tooltip from '@app/components/Common/Tooltip';
+import DownloadButton from '@app/components/DownloadButton';
 import ExternalLinkBlock from '@app/components/ExternalLinkBlock';
 import IssueModal from '@app/components/IssueModal';
 import ManageSlideOver from '@app/components/ManageSlideOver';
@@ -379,6 +380,21 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
             tmdbId={data.id}
             onUpdate={() => revalidate()}
           />
+          {data.mediaInfo &&
+            (data.mediaInfo.status === MediaStatus.AVAILABLE ||
+              data.mediaInfo.status4k === MediaStatus.AVAILABLE) &&
+            hasPermission(Permission.DOWNLOAD) && (
+              <DownloadButton
+                className="ml-2 first:ml-0"
+                item={{
+                  type: 'movie',
+                  mediaId: data.mediaInfo.id,
+                  title: data.title,
+                  subtitle: data.releaseDate?.slice(0, 4),
+                  posterPath: data.posterPath,
+                }}
+              />
+            )}
           {(data.mediaInfo?.status === MediaStatus.AVAILABLE ||
             (settings.currentSettings.movie4kEnabled &&
               hasPermission(

@@ -13,6 +13,7 @@ import PlayButton from '@app/components/Common/PlayButton';
 import StatusBadgeMini from '@app/components/Common/StatusBadgeMini';
 import Tag from '@app/components/Common/Tag';
 import Tooltip from '@app/components/Common/Tooltip';
+import DownloadButton from '@app/components/DownloadButton';
 import ExternalLinkBlock from '@app/components/ExternalLinkBlock';
 import IssueModal from '@app/components/IssueModal';
 import ManageSlideOver from '@app/components/ManageSlideOver';
@@ -555,6 +556,24 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                     season.seasonNumber === s.seasonNumber &&
                     s.status4k !== MediaStatus.UNKNOWN
                 );
+                const isSeasonDownloadable =
+                  !!data.mediaInfo &&
+                  hasPermission(Permission.DOWNLOAD) &&
+                  (data.mediaInfo.seasons ?? []).some(
+                    (s) =>
+                      s.seasonNumber === season.seasonNumber &&
+                      [s.status, s.status4k].some(
+                        (status) =>
+                          status === MediaStatus.AVAILABLE ||
+                          status === MediaStatus.PARTIALLY_AVAILABLE
+                      )
+                  );
+                const seasonName =
+                  season.seasonNumber === 0
+                    ? intl.formatMessage(globalMessages.specials)
+                    : intl.formatMessage(messages.seasonnumber, {
+                        seasonNumber: season.seasonNumber,
+                      });
                 const request = (data.mediaInfo?.requests ?? [])
                   .filter(
                     (r) =>
@@ -815,9 +834,35 @@ const TvDetails = ({ tv }: TvDetailsProps) => {
                           style={{ margin: '0px' }}
                         >
                           <Disclosure.Panel className="w-full rounded-b-md border-b border-l border-r border-gray-700 px-4 pb-2">
+                            {isSeasonDownloadable && data.mediaInfo && (
+                              <div className="flex justify-end pt-4">
+                                <DownloadButton
+                                  buttonSize="sm"
+                                  item={{
+                                    type: 'season',
+                                    mediaId: data.mediaInfo.id,
+                                    seasonNumber: season.seasonNumber,
+                                    title: data.name,
+                                    subtitle: seasonName,
+                                    posterPath:
+                                      season.posterPath ?? data.posterPath,
+                                  }}
+                                />
+                              </div>
+                            )}
                             <Season
                               tvId={data.id}
                               seasonNumber={season.seasonNumber}
+                              download={
+                                isSeasonDownloadable && data.mediaInfo
+                                  ? {
+                                      mediaId: data.mediaInfo.id,
+                                      title: data.name,
+                                      posterPath:
+                                        season.posterPath ?? data.posterPath,
+                                    }
+                                  : undefined
+                              }
                             />
                           </Disclosure.Panel>
                         </Transition>

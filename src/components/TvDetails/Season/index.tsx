@@ -1,5 +1,7 @@
 import AirDateBadge from '@app/components/AirDateBadge';
 import LoadingSpinner from '@app/components/Common/LoadingSpinner';
+import DownloadButton from '@app/components/DownloadButton';
+import type { DownloadableSeasonResponse } from '@server/interfaces/api/downloadInterfaces';
 import type { SeasonWithEpisodes } from '@server/models/Tv';
 import { defineMessages, useIntl } from 'react-intl';
 import useSWR from 'swr';
@@ -7,17 +9,30 @@ import useSWR from 'swr';
 const messages = defineMessages({
   somethingwentwrong: 'Something went wrong while retrieving season data.',
   noepisodes: 'Episode list unavailable.',
+  episodecode: 'S{seasonNumber}E{episodeNumber} - {name}',
 });
 
 type SeasonProps = {
   seasonNumber: number;
   tvId: number;
+  download?: {
+    mediaId: number;
+    title: string;
+    posterPath?: string;
+  };
 };
 
-const Season = ({ seasonNumber, tvId }: SeasonProps) => {
+const pad = (value: number) => String(value).padStart(2, '0');
+
+const Season = ({ seasonNumber, tvId, download }: SeasonProps) => {
   const intl = useIntl();
   const { data, error } = useSWR<SeasonWithEpisodes>(
     `/api/v1/tv/${tvId}/season/${seasonNumber}`
+  );
+  const { data: downloadable } = useSWR<DownloadableSeasonResponse>(
+    download
+      ? `/api/v1/download/tv/${download.mediaId}/season/${seasonNumber}`
+      : null
   );
 
   if (!data && !error) {
@@ -52,6 +67,29 @@ const Season = ({ seasonNumber, tvId }: SeasonProps) => {
                     )}
                   </div>
                   {episode.overview && <p>{episode.overview}</p>}
+                  {download &&
+                    downloadable?.episodes.some(
+                      (e) => e.episodeNumber === episode.episodeNumber
+                    ) && (
+                      <div className="mt-2">
+                        <DownloadButton
+                          buttonSize="sm"
+                          item={{
+                            type: 'episode',
+                            mediaId: download.mediaId,
+                            seasonNumber,
+                            episodeNumber: episode.episodeNumber,
+                            title: download.title,
+                            subtitle: intl.formatMessage(messages.episodecode, {
+                              seasonNumber: pad(seasonNumber),
+                              episodeNumber: pad(episode.episodeNumber),
+                              name: episode.name,
+                            }),
+                            posterPath: download.posterPath,
+                          }}
+                        />
+                      </div>
+                    )}
                 </div>
                 {episode.stillPath && (
                   <img

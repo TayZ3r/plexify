@@ -25,6 +25,8 @@ const messages = defineMessages({
   newPlexLoginTip: 'Allow Plex users to sign in without first being imported',
   movieRequestLimitLabel: 'Global Movie Request Limit',
   tvRequestLimitLabel: 'Global Series Request Limit',
+  downloadLimitLabel: 'Global Download Limit',
+  downloadLimitTip: 'Each downloaded file (movie or episode) counts as one',
   defaultPermissions: 'Default Permissions',
   defaultPermissionsTip: 'Initial permissions assigned to new users',
 });
@@ -65,6 +67,8 @@ const SettingsUsers = () => {
             movieQuotaDays: data?.defaultQuotas.movie.quotaDays ?? 7,
             tvQuotaLimit: data?.defaultQuotas.tv.quotaLimit ?? 0,
             tvQuotaDays: data?.defaultQuotas.tv.quotaDays ?? 7,
+            downloadQuotaLimit: data?.defaultQuotas.download?.quotaLimit ?? 0,
+            downloadQuotaDays: data?.defaultQuotas.download?.quotaDays ?? 7,
             defaultPermissions: data?.defaultPermissions ?? 0,
           }}
           enableReinitialize
@@ -81,6 +85,10 @@ const SettingsUsers = () => {
                   tv: {
                     quotaLimit: values.tvQuotaLimit,
                     quotaDays: values.tvQuotaDays,
+                  },
+                  download: {
+                    quotaLimit: values.downloadQuotaLimit,
+                    quotaDays: values.downloadQuotaDays,
                   },
                 },
                 defaultPermissions: values.defaultPermissions,
@@ -167,6 +175,24 @@ const SettingsUsers = () => {
                       mediaType="tv"
                       defaultDays={values.tvQuotaDays}
                       defaultLimit={values.tvQuotaLimit}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label htmlFor="downloadQuotaLimit" className="text-label">
+                    {intl.formatMessage(messages.downloadLimitLabel)}
+                    <span className="label-tip">
+                      {intl.formatMessage(messages.downloadLimitTip)}
+                    </span>
+                  </label>
+                  <div className="form-input-area">
+                    <QuotaSelector
+                      onChange={setFieldValue}
+                      dayFieldName="downloadQuotaDays"
+                      limitFieldName="downloadQuotaLimit"
+                      mediaType="download"
+                      defaultDays={values.downloadQuotaDays}
+                      defaultLimit={values.downloadQuotaLimit}
                     />
                   </div>
                 </div>

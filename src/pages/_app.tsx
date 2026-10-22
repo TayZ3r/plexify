@@ -5,6 +5,7 @@ import ServiceWorkerSetup from '@app/components/ServiceWorkerSetup';
 import StatusChecker from '@app/components/StatusChecker';
 import Toast from '@app/components/Toast';
 import ToastContainer from '@app/components/ToastContainer';
+import { DownloadCartProvider } from '@app/context/DownloadCartContext';
 import { InteractionProvider } from '@app/context/InteractionContext';
 import type { AvailableLocale } from '@app/context/LanguageContext';
 import { LanguageContext } from '@app/context/LanguageContext';
@@ -212,7 +213,9 @@ const CoreApp: Omit<NextAppComponentType, 'origGetInitialProps'> = ({
                 </Head>
                 <StatusChecker />
                 <ServiceWorkerSetup />
-                <UserContext initialUser={user}>{component}</UserContext>
+                <UserContext initialUser={user}>
+                  <DownloadCartProvider>{component}</DownloadCartProvider>
+                </UserContext>
               </ToastProvider>
             </InteractionProvider>
           </SettingsProvider>

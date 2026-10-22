@@ -10,10 +10,14 @@ export interface UserSettingsGeneralResponse {
   movieQuotaDays?: number;
   tvQuotaLimit?: number;
   tvQuotaDays?: number;
+  downloadQuotaLimit?: number;
+  downloadQuotaDays?: number;
   globalMovieQuotaDays?: number;
   globalMovieQuotaLimit?: number;
   globalTvQuotaLimit?: number;
   globalTvQuotaDays?: number;
+  globalDownloadQuotaLimit?: number;
+  globalDownloadQuotaDays?: number;
   watchlistSyncMovies?: boolean;
   watchlistSyncTv?: boolean;
 }

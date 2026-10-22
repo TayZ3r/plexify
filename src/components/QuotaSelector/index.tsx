@@ -6,14 +6,17 @@ const messages = defineMessages({
     '{quotaLimit} <quotaUnits>{movies} per {quotaDays} {days}</quotaUnits>',
   tvRequests:
     '{quotaLimit} <quotaUnits>{seasons} per {quotaDays} {days}</quotaUnits>',
+  downloads:
+    '{quotaLimit} <quotaUnits>{downloads} per {quotaDays} {days}</quotaUnits>',
   movies: '{count, plural, one {movie} other {movies}}',
   seasons: '{count, plural, one {season} other {seasons}}',
+  downloadUnits: '{count, plural, one {download} other {downloads}}',
   days: '{count, plural, one {day} other {days}}',
   unlimited: 'Unlimited',
 });
 
 interface QuotaSelectorProps {
-  mediaType: 'movie' | 'tv';
+  mediaType: 'movie' | 'tv' | 'download';
   defaultDays?: number;
   defaultLimit?: number;
   dayOverride?: number;
@@ -52,7 +55,11 @@ const QuotaSelector = ({
   return (
     <div className={`${isDisabled ? 'opacity-50' : ''}`}>
       {intl.formatMessage(
-        mediaType === 'movie' ? messages.movieRequests : messages.tvRequests,
+        mediaType === 'movie'
+          ? messages.movieRequests
+          : mediaType === 'download'
+          ? messages.downloads
+          : messages.tvRequests,
         {
           quotaLimit: (
             <select
@@ -87,6 +94,9 @@ const QuotaSelector = ({
           ),
           movies: intl.formatMessage(messages.movies, { count: quotaLimit }),
           seasons: intl.formatMessage(messages.seasons, { count: quotaLimit }),
+          downloads: intl.formatMessage(messages.downloadUnits, {
+            count: quotaLimit,
+          }),
           days: intl.formatMessage(messages.days, { count: quotaDays }),
           quotaUnits: function quotaUnits(msg) {
             return (

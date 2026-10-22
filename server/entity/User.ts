@@ -25,6 +25,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import Issue from './Issue';
+import { MediaDownload } from './MediaDownload';
 import { MediaRequest } from './MediaRequest';
 import SeasonRequest from './SeasonRequest';
 import { UserPushSubscription } from './UserPushSubscription';
@@ -102,6 +103,12 @@ export class User {
 
   @Column({ nullable: true })
   public tvQuotaDays?: number;
+
+  @Column({ nullable: true })
+  public downloadQuotaLimit?: number;
+
+  @Column({ nullable: true })
+  public downloadQuotaDays?: number;
 
   @OneToOne(() => UserSettings, (settings) => settings.user, {
     cascade: true,
@@ -306,6 +313,29 @@ export class User {
         ).reduce((sum: number, req: MediaRequest) => sum + req.seasonCount, 0)
       : 0;
 
+    const downloadQuotaLimit = !canBypass
+      ? this.downloadQuotaLimit ?? defaultQuotas.download?.quotaLimit
+      : 0;
+    const downloadQuotaDays =
+      this.downloadQuotaDays ?? defaultQuotas.download?.quotaDays;
+
+    // Count files downloaded during quota period
+    const downloadDate = new Date();
+    if (downloadQuotaDays) {
+      downloadDate.setDate(downloadDate.getDate() - downloadQuotaDays);
+    }
+
+    const downloadQuotaUsed = downloadQuotaLimit
+      ? await getRepository(MediaDownload).count({
+          where: {
+            user: {
+              id: this.id,
+            },
+            createdAt: AfterDate(downloadDate),
+          },
+        })
+      : 0;
+
     return {
       movie: {
         days: movieQuotaDays,
@@ -328,6 +358,18 @@ export class User {
           : undefined,
         restricted:
           tvQuotaLimit && tvQuotaLimit - tvQuotaUsed <= 0 ? true : false,
+      },
+      download: {
+        days: downloadQuotaDays,
+        limit: downloadQuotaLimit,
+        used: downloadQuotaUsed,
+        remaining: downloadQuotaLimit
+          ? Math.max(0, downloadQuotaLimit - downloadQuotaUsed)
+          : undefined,
+        restricted:
+          downloadQuotaLimit && downloadQuotaLimit - downloadQuotaUsed <= 0
+            ? true
+            : false,
       },
     };
   }

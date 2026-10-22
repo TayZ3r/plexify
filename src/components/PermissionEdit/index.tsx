@@ -75,6 +75,9 @@ export const messages = defineMessages({
   viewwatchlists: 'View Plex Watchlists',
   viewwatchlistsDescription:
     "Grant permission to view other users' Plex Watchlists.",
+  download: 'Download',
+  downloadDescription:
+    'Grant permission to download movies and episodes available on Plex.',
 });
 
 interface PermissionEditProps {
@@ -291,6 +294,12 @@ export const PermissionEdit = ({
           ],
         },
       ],
+    },
+    {
+      id: 'download',
+      name: intl.formatMessage(messages.download),
+      description: intl.formatMessage(messages.downloadDescription),
+      permission: Permission.DOWNLOAD,
     },
     {
       id: 'manageissues',

@@ -36,6 +36,8 @@ tags:
     description: Endpoints related to retrieving collection details.
   - name: service
     description: Endpoints related to getting service (Radarr/Sonarr) details.
+  - name: download
+    description: Endpoints related to downloading media files from Plex.
 servers:
   - url: '{server}/api/v1'
     variables:
@@ -1759,6 +1761,28 @@ components:
           flatrate:
             items:
               $ref: '#/components/schemas/WatchProviderDetails'
+    DownloadFile:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        title:
+          type: string
+          example: Movie Title
+        fileName:
+          type: string
+          example: Movie Title (2020).mkv
+        fileSize:
+          type: number
+          nullable: true
+        createdAt:
+          type: string
+        expiresAt:
+          type: string
+        url:
+          type: string
+          example: /api/v1/download/1/file
     WatchProviderDetails:
       type: object
       properties:
@@ -6566,6 +6590,168 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WatchProviderDetails'
+  /download:
+    get:
+      summary: Get recent downloads of the current user
+      description: |
+        Returns the downloads of the current user whose link has not expired yet, along with the download quota. Requires the `DOWNLOAD` permission.
+      tags:
+        - download
+      responses:
+        '200':
+          description: Downloads returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloads:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DownloadFile'
+                  quota:
+                    type: object
+                    properties:
+                      days:
+                        type: number
+                      limit:
+                        type: number
+                      used:
+                        type: number
+                      remaining:
+                        type: number
+                      restricted:
+                        type: boolean
+    post:
+      summary: Validate a download cart
+      description: |
+        Resolves the items of the cart to Plex files, checks the download quota of the current user and returns a download link for each file. Requires the `DOWNLOAD` permission.
+      tags:
+        - download
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - mediaId
+                    properties:
+                      type:
+                        type: string
+                        enum: [movie, season, episode]
+                      mediaId:
+                        type: number
+                        example: 1
+                      seasonNumber:
+                        type: number
+                        example: 1
+                      episodeNumber:
+                        type: number
+                        example: 1
+      responses:
+        '201':
+          description: Download links returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloads:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DownloadFile'
+                  quota:
+                    type: object
+                    properties:
+                      days:
+                        type: number
+                      limit:
+                        type: number
+                      used:
+                        type: number
+                      remaining:
+                        type: number
+                      restricted:
+                        type: boolean
+        '403':
+          description: Download limit exceeded
+  /download/tv/{mediaId}/season/{seasonNumber}:
+    get:
+      summary: Get downloadable episodes of a season
+      description: |
+        Returns the episodes of a season which are available on Plex. Requires the `DOWNLOAD` permission.
+      tags:
+        - download
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: number
+        - in: path
+          name: seasonNumber
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Downloadable episodes returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seasonNumber:
+                    type: number
+                  episodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        episodeNumber:
+                          type: number
+                        title:
+                          type: string
+                        files:
+                          type: number
+  /download/{downloadId}/file:
+    get:
+      summary: Download a file
+      description: |
+        Streams a file previously added to a validated download cart of the current user. Supports `Range` requests. Requires the `DOWNLOAD` permission.
+      tags:
+        - download
+      parameters:
+        - in: path
+          name: downloadId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '206':
+          description: Partial file content
+        '404':
+          description: Download not found
+        '410':
+          description: Download link expired
 security:
   - cookieAuth: []
   - apiKey: []

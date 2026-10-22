@@ -42,6 +42,7 @@ const messages = defineMessages({
   originallanguageTip: 'Filter content by original language',
   movierequestlimit: 'Movie Request Limit',
   seriesrequestlimit: 'Series Request Limit',
+  downloadlimit: 'Download Limit',
   enableOverride: 'Override Global Limit',
   applanguage: 'Display Language',
   languageDefault: 'Default ({language})',
@@ -63,6 +64,7 @@ const UserGeneralSettings = () => {
   const { locale, setLocale } = useLocale();
   const [movieQuotaEnabled, setMovieQuotaEnabled] = useState(false);
   const [tvQuotaEnabled, setTvQuotaEnabled] = useState(false);
+  const [downloadQuotaEnabled, setDownloadQuotaEnabled] = useState(false);
   const router = useRouter();
   const {
     user,
@@ -93,6 +95,10 @@ const UserGeneralSettings = () => {
     );
     setTvQuotaEnabled(
       data?.tvQuotaLimit != undefined && data?.tvQuotaDays != undefined
+    );
+    setDownloadQuotaEnabled(
+      data?.downloadQuotaLimit != undefined &&
+        data?.downloadQuotaDays != undefined
     );
   }, [data]);
 
@@ -128,6 +134,8 @@ const UserGeneralSettings = () => {
           movieQuotaDays: data?.movieQuotaDays,
           tvQuotaLimit: data?.tvQuotaLimit,
           tvQuotaDays: data?.tvQuotaDays,
+          downloadQuotaLimit: data?.downloadQuotaLimit,
+          downloadQuotaDays: data?.downloadQuotaDays,
           watchlistSyncMovies: data?.watchlistSyncMovies,
           watchlistSyncTv: data?.watchlistSyncTv,
         }}
@@ -147,6 +155,12 @@ const UserGeneralSettings = () => {
               movieQuotaDays: movieQuotaEnabled ? values.movieQuotaDays : null,
               tvQuotaLimit: tvQuotaEnabled ? values.tvQuotaLimit : null,
               tvQuotaDays: tvQuotaEnabled ? values.tvQuotaDays : null,
+              downloadQuotaLimit: downloadQuotaEnabled
+                ? values.downloadQuotaLimit
+                : null,
+              downloadQuotaDays: downloadQuotaEnabled
+                ? values.downloadQuotaDays
+                : null,
               watchlistSyncMovies: values.watchlistSyncMovies,
               watchlistSyncTv: values.watchlistSyncTv,
             });
@@ -411,6 +425,51 @@ const UserGeneralSettings = () => {
                             limitOverride={
                               !tvQuotaEnabled
                                 ? data?.globalTvQuotaLimit
+                                : undefined
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <label
+                        htmlFor="downloadQuotaLimit"
+                        className="text-label"
+                      >
+                        <span>
+                          {intl.formatMessage(messages.downloadlimit)}
+                        </span>
+                      </label>
+                      <div className="form-input-area">
+                        <div className="flex flex-col">
+                          <div className="mb-4 flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={downloadQuotaEnabled}
+                              onChange={() =>
+                                setDownloadQuotaEnabled((s) => !s)
+                              }
+                            />
+                            <span className="ml-2 text-gray-300">
+                              {intl.formatMessage(messages.enableOverride)}
+                            </span>
+                          </div>
+                          <QuotaSelector
+                            isDisabled={!downloadQuotaEnabled}
+                            dayFieldName="downloadQuotaDays"
+                            limitFieldName="downloadQuotaLimit"
+                            mediaType="download"
+                            onChange={setFieldValue}
+                            defaultDays={values.downloadQuotaDays}
+                            defaultLimit={values.downloadQuotaLimit}
+                            dayOverride={
+                              !downloadQuotaEnabled
+                                ? data?.globalDownloadQuotaDays
+                                : undefined
+                            }
+                            limitOverride={
+                              !downloadQuotaEnabled
+                                ? data?.globalDownloadQuotaLimit
                                 : undefined
                             }
                           />

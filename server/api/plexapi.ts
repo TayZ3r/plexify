@@ -44,8 +44,10 @@ export interface PlexMetadata {
   ratingKey: string;
   parentRatingKey?: string;
   guid: string;
-  type: 'movie' | 'show' | 'season';
+  type: 'movie' | 'show' | 'season' | 'episode';
   title: string;
+  parentTitle?: string;
+  grandparentTitle?: string;
   Guid: {
     id: string;
   }[];
@@ -62,6 +64,14 @@ export interface PlexMetadata {
   Media: Media[];
 }
 
+export interface PlexMediaPart {
+  id: number;
+  key: string;
+  file: string;
+  size?: number;
+  container?: string;
+}
+
 interface Media {
   id: number;
   duration: number;
@@ -76,6 +86,7 @@ interface Media {
   container: string;
   videoFrameRate: string;
   videoProfile: string;
+  Part?: PlexMediaPart[];
 }
 
 interface PlexMetadataResponse {
