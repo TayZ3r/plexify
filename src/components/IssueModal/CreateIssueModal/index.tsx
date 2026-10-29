@@ -1,12 +1,14 @@
 import Button from '@app/components/Common/Button';
 import Modal from '@app/components/Common/Modal';
-import { issueOptions } from '@app/components/IssueModal/constants';
+import {
+  canReportIssue,
+  issueOptions,
+} from '@app/components/IssueModal/constants';
 import useSettings from '@app/hooks/useSettings';
 import { Permission, useUser } from '@app/hooks/useUser';
 import globalMessages from '@app/i18n/globalMessages';
 import { RadioGroup } from '@headlessui/react';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/solid';
-import { MediaStatus } from '@server/constants/media';
 import type Issue from '@server/entity/Issue';
 import type { MovieDetails } from '@server/models/Movie';
 import type { TvDetails } from '@server/models/Tv';
@@ -72,14 +74,12 @@ const CreateIssueModal = ({
   const availableSeasons = (data?.mediaInfo?.seasons ?? [])
     .filter(
       (season) =>
-        season.status === MediaStatus.AVAILABLE ||
-        season.status === MediaStatus.PARTIALLY_AVAILABLE ||
+        canReportIssue(season.status) ||
         (settings.currentSettings.series4kEnabled &&
           hasPermission([Permission.REQUEST_4K, Permission.REQUEST_4K_TV], {
             type: 'or',
           }) &&
-          (season.status4k === MediaStatus.AVAILABLE ||
-            season.status4k === MediaStatus.PARTIALLY_AVAILABLE))
+          canReportIssue(season.status4k))
     )
     .map((season) => season.seasonNumber);
 

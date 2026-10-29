@@ -15,6 +15,7 @@ import Tooltip from '@app/components/Common/Tooltip';
 import DownloadButton from '@app/components/DownloadButton';
 import ExternalLinkBlock from '@app/components/ExternalLinkBlock';
 import IssueModal from '@app/components/IssueModal';
+import { canReportIssue } from '@app/components/IssueModal/constants';
 import ManageSlideOver from '@app/components/ManageSlideOver';
 import MediaSlider from '@app/components/MediaSlider';
 import PersonCard from '@app/components/PersonCard';
@@ -395,7 +396,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                 }}
               />
             )}
-          {(data.mediaInfo?.status === MediaStatus.AVAILABLE ||
+          {(canReportIssue(data.mediaInfo?.status) ||
             (settings.currentSettings.movie4kEnabled &&
               hasPermission(
                 [Permission.REQUEST_4K, Permission.REQUEST_4K_MOVIE],
@@ -403,7 +404,7 @@ const MovieDetails = ({ movie }: MovieDetailsProps) => {
                   type: 'or',
                 }
               ) &&
-              data.mediaInfo?.status4k === MediaStatus.AVAILABLE)) &&
+              canReportIssue(data.mediaInfo?.status4k))) &&
             hasPermission(
               [Permission.CREATE_ISSUES, Permission.MANAGE_ISSUES],
               {
