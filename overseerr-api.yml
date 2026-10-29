@@ -4107,6 +4107,87 @@ paths:
                   permissions:
                     type: number
                     example: 2
+  /user/{userId}/settings/sessions:
+    get:
+      summary: Get the open sessions of a user
+      description: Returns every open session of a specific user. Requires `ADMIN` permission.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: User sessions returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        ip:
+                          type: string
+                        userAgent:
+                          type: string
+                        createdAt:
+                          type: string
+                        lastActiveAt:
+                          type: string
+                        expiresAt:
+                          type: string
+                        current:
+                          type: boolean
+    delete:
+      summary: Delete every session of a user
+      description: Deletes every open session of a specific user, which logs them out. Requires `ADMIN` permission.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Sessions deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: number
+                    example: 2
+  /user/{userId}/settings/sessions/{sessionId}:
+    delete:
+      summary: Delete a session of a user
+      description: Deletes one open session of a specific user, which logs it out. Requires `ADMIN` permission.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: number
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Session deleted
   /user/{userId}/watch_data:
     get:
       summary: Get watch data

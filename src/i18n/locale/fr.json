@@ -1289,5 +1289,21 @@
   "components.DownloadCart.opendownloads": "Ouvrir les téléchargements",
   "components.DownloadCart.empty": "Aucun élément sélectionné pour le téléchargement.",
   "components.DownloadCart.vlcadvice": "Pour une meilleure compatibilité, nous vous conseillons de lire vos fichiers avec VLC.",
-  "components.DownloadCart.getvlc": "Installer VLC ({store})"
+  "components.DownloadCart.getvlc": "Installer VLC ({store})",
+  "components.UserProfile.UserSettings.menuSessions": "Sessions",
+  "components.UserProfile.UserSettings.UserSessions.sessions": "Sessions",
+  "components.UserProfile.UserSettings.UserSessions.sessionsDescription": "Tous les appareils actuellement connectés à ce compte. Supprimer une session déconnecte l'appareil.",
+  "components.UserProfile.UserSettings.UserSessions.noSessions": "Cet utilisateur n'a aucune session ouverte.",
+  "components.UserProfile.UserSettings.UserSessions.currentSession": "Cette session",
+  "components.UserProfile.UserSettings.UserSessions.unknownDevice": "Appareil inconnu",
+  "components.UserProfile.UserSettings.UserSessions.unknown": "Inconnu",
+  "components.UserProfile.UserSettings.UserSessions.ipAddress": "Adresse IP",
+  "components.UserProfile.UserSettings.UserSessions.signedIn": "Connexion",
+  "components.UserProfile.UserSettings.UserSessions.lastActive": "Dernière activité",
+  "components.UserProfile.UserSettings.UserSessions.expires": "Expiration",
+  "components.UserProfile.UserSettings.UserSessions.deleteSession": "Déconnecter",
+  "components.UserProfile.UserSettings.UserSessions.deleteAllSessions": "Déconnecter toutes les sessions",
+  "components.UserProfile.UserSettings.UserSessions.toastDeleteSuccess": "Session supprimée.",
+  "components.UserProfile.UserSettings.UserSessions.toastDeleteAllSuccess": "{count} {count, plural, one {session supprimée} other {sessions supprimées}}.",
+  "components.UserProfile.UserSettings.UserSessions.toastDeleteFailure": "Une erreur est survenue lors de la suppression de la session."
 }

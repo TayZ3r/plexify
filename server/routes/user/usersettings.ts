@@ -2,10 +2,12 @@ import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
 import { UserSettings } from '@server/entity/UserSettings';
 import type {
+  UserSessionsResponse,
   UserSettingsGeneralResponse,
   UserSettingsNotificationsResponse,
 } from '@server/interfaces/api/userSettingsInterfaces';
 import { Permission } from '@server/lib/permissions';
+import { deleteUserSessions, getUserSessions } from '@server/lib/sessions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
@@ -21,6 +23,47 @@ const isOwnProfileOrAdmin = (): Middleware => {
       return next({
         status: 403,
         message: "You do not have permission to view this user's settings.",
+      });
+    }
+
+    next();
+  };
+  return authMiddleware;
+};
+
+// Session management is an admin-only feature. Like passwords, only the
+// owner (user 1) can manage the sessions of other admins.
+const canManageSessions = (): Middleware => {
+  const authMiddleware: Middleware = async (req, res, next) => {
+    if (!req.user?.hasPermission(Permission.ADMIN)) {
+      return next({
+        status: 403,
+        message: "You do not have permission to manage this user's sessions.",
+      });
+    }
+
+    let user: User | null;
+
+    try {
+      user = await getRepository(User).findOne({
+        where: { id: Number(req.params.id) },
+      });
+    } catch (e) {
+      return next({ status: 500, message: e.message });
+    }
+
+    if (!user) {
+      return next({ status: 404, message: 'User not found.' });
+    }
+
+    if (
+      req.user.id !== 1 &&
+      req.user.id !== user.id &&
+      user.hasPermission(Permission.ADMIN)
+    ) {
+      return next({
+        status: 403,
+        message: "You do not have permission to manage this user's sessions.",
       });
     }
 
@@ -427,6 +470,86 @@ userSettingsRoutes.post<
       return res.status(200).json({ permissions: user.permissions });
     } catch (e) {
       next({ status: 500, message: e.message });
+    }
+  }
+);
+
+userSettingsRoutes.get<{ id: string }, UserSessionsResponse>(
+  '/sessions',
+  canManageSessions(),
+  async (req, res, next) => {
+    try {
+      const sessions = await getUserSessions(
+        Number(req.params.id),
+        req.sessionID
+      );
+
+      return res.status(200).json({ sessions });
+    } catch (e) {
+      logger.error('Something went wrong retrieving user sessions', {
+        label: 'API',
+        errorMessage: e.message,
+        userId: req.params.id,
+      });
+      next({ status: 500, message: 'Unable to retrieve sessions.' });
+    }
+  }
+);
+
+userSettingsRoutes.delete<{ id: string }, { deleted: number }>(
+  '/sessions',
+  canManageSessions(),
+  async (req, res, next) => {
+    try {
+      const deleted = await deleteUserSessions(Number(req.params.id));
+
+      logger.info('All sessions of a user were deleted', {
+        label: 'API',
+        userId: req.params.id,
+        deletedBy: req.user?.id,
+        deleted,
+      });
+
+      return res.status(200).json({ deleted });
+    } catch (e) {
+      logger.error('Something went wrong deleting user sessions', {
+        label: 'API',
+        errorMessage: e.message,
+        userId: req.params.id,
+      });
+      next({ status: 500, message: 'Unable to delete sessions.' });
+    }
+  }
+);
+
+userSettingsRoutes.delete<{ id: string; sessionId: string }>(
+  '/sessions/:sessionId',
+  canManageSessions(),
+  async (req, res, next) => {
+    try {
+      const deleted = await deleteUserSessions(
+        Number(req.params.id),
+        req.params.sessionId
+      );
+
+      if (!deleted) {
+        return next({ status: 404, message: 'Session not found.' });
+      }
+
+      logger.info('A user session was deleted', {
+        label: 'API',
+        userId: req.params.id,
+        deletedBy: req.user?.id,
+      });
+
+      return res.status(204).send();
+    } catch (e) {
+      logger.error('Something went wrong deleting a user session', {
+        label: 'API',
+        errorMessage: e.message,
+        userId: req.params.id,
+      });
+      next({ status: 500, message: 'Unable to delete the session.' });
     }
   }
 );

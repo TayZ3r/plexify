@@ -40,3 +40,17 @@ export interface UserSettingsNotificationsResponse {
   webPushEnabled?: boolean;
   notificationTypes: Partial<NotificationAgentTypes>;
 }
+
+export interface UserSession {
+  id: string;
+  ip?: string;
+  userAgent?: string;
+  createdAt?: Date;
+  lastActiveAt?: Date;
+  expiresAt: Date;
+  current: boolean;
+}
+
+export interface UserSessionsResponse {
+  sessions: UserSession[];
+}

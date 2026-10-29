@@ -4,6 +4,7 @@ import type {
   Permission,
   PermissionCheckOptions,
 } from '@server/lib/permissions';
+import { touchUserSession } from '@server/lib/sessions';
 import { getSettings } from '@server/lib/settings';
 
 export const checkUser: Middleware = async (req, _res, next) => {
@@ -31,6 +32,7 @@ export const checkUser: Middleware = async (req, _res, next) => {
 
   if (user) {
     req.user = user;
+    touchUserSession(req);
   }
 
   req.locale = user?.settings?.locale

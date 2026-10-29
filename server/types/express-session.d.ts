@@ -5,5 +5,10 @@ import 'express-session';
 declare module 'express-session' {
   interface SessionData {
     userId: number;
+    // Shown to admins in the user's "Sessions" settings
+    ip?: string;
+    userAgent?: string;
+    createdAt?: number;
+    lastActiveAt?: number;
   }
 }

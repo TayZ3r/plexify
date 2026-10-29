@@ -3,6 +3,7 @@ import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
 import { Permission } from '@server/lib/permissions';
+import { startUserSession } from '@server/lib/sessions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import { isAuthenticated } from '@server/middleware/auth';
@@ -168,9 +169,7 @@ authRoutes.post('/plex', async (req, res, next) => {
     }
 
     // Set logged in session
-    if (req.session) {
-      req.session.userId = user.id;
-    }
+    startUserSession(req, user.id);
 
     return res.status(200).json(user?.filter() ?? {});
   } catch (e) {
@@ -289,8 +288,8 @@ authRoutes.post('/local', async (req, res, next) => {
     }
 
     // Set logged in session
-    if (user && req.session) {
-      req.session.userId = user.id;
+    if (user) {
+      startUserSession(req, user.id);
     }
 
     return res.status(200).json(user?.filter() ?? {});

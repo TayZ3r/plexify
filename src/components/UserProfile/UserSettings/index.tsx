@@ -19,6 +19,7 @@ const messages = defineMessages({
   menuChangePass: 'Password',
   menuNotifications: 'Notifications',
   menuPermissions: 'Permissions',
+  menuSessions: 'Sessions',
   unauthorizedDescription:
     "You do not have permission to modify this user's settings.",
 });
@@ -79,6 +80,17 @@ const UserSettings = ({ children }: UserSettingsProps) => {
       regex: /\/settings\/permissions/,
       requiredPermission: Permission.MANAGE_USERS,
       hidden: currentUser?.id !== 1 && currentUser?.id === user.id,
+    },
+    {
+      text: intl.formatMessage(messages.menuSessions),
+      route: '/settings/sessions',
+      regex: /\/settings\/sessions/,
+      requiredPermission: Permission.ADMIN,
+      // Only the owner can manage the sessions of other admins
+      hidden:
+        currentUser?.id !== 1 &&
+        currentUser?.id !== user.id &&
+        hasPermission(Permission.ADMIN, user.permissions ?? 0),
     },
   ];
 
